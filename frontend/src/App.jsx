@@ -2,13 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Button, Rating, Spinner } from 'flowbite-react';
 
 const App = props => {
+  
   const [movies, setMovies] = useState([]);
+  const [genres, setGenres] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
-  const fetchMovies = () => {
+  const fetchMovies = (genreId) => {
     setLoading(true);
+    const url = 'http://localhost:8000/movies';
+    const query = `genreId=${genreId}`;
 
-    return fetch('http://localhost:8000/movies')
+    return fetch(`${url}?${query}`)
       .then(response => response.json())
       .then(data => {
         setMovies(data);
@@ -16,13 +21,28 @@ const App = props => {
       });
   }
 
+  const fetchGenres = () => {
+    setLoading(true);
+
+    return fetch('http://localhost:8000/genres')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        setGenres(data);
+        setLoading(false);
+      });
+  }
+
   useEffect(() => {
-    fetchMovies();
+    fetchMovies('');
+    fetchGenres();
   }, []);
 
   return (
     <Layout>
-      <Heading />
+      <Heading/>
+
+      <Filter genres={genres} fetchMovies={fetchMovies}/>
 
       <MovieList loading={loading}>
         {movies.map((item, key) => (
@@ -32,6 +52,24 @@ const App = props => {
     </Layout>
   );
 };
+
+const Filter = props =>{
+  return(
+    <div className='flex justify-center gap-4 items-center bg-grey mb-10'>
+        <span>
+          Ricerca per genere
+        </span>
+          <div>
+            <select name="" id="" onChange={(e)=>props.fetchMovies(e.target.value)}>
+              <option value="" selected>Tutti</option>
+              {props.genres?.map((genre,index)=>(
+                <option key={'genre'+ index} value={genre.id}>{genre.name}</option>
+              ))}
+            </select>
+          </div>
+      </div>
+  )
+}
 
 const Layout = props => {
   return (
@@ -53,6 +91,8 @@ const Heading = props => {
       <p className="font-light text-gray-500 lg:mb-16 sm:text-xl dark:text-gray-400">
         Explore the whole collection of movies
       </p>
+
+      
     </div>
   );
 };

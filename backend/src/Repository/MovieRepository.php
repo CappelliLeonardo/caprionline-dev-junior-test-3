@@ -21,6 +21,34 @@ class MovieRepository extends ServiceEntityRepository
         parent::__construct($registry, Movie::class);
     }
 
+    /**
+     * $releaseDateSorting sort della colonna releaseDate
+     * $ratingSorting sort della colonna rating
+     * $genreId id del genere selezionato
+    * @return Movie[] Returns an array of Movie objects
+    */
+    public function findMoviesByGenre($genreId)
+    {
+        // Creo query builder personalizzata per i movie
+        $movies= $this->createQueryBuilder('m')
+            ->leftJoin('m.movieGenres', 'mg');
+            
+            
+    
+        // user story 2: aggiunta filtro per genere
+            if ($genreId !== '') {
+                $movies->andwhere('mg.genre = :genreId')
+                    ->setParameter('genreId', $genreId);
+
+            }
+            //userstory 1: aggiunto ordinamento per data di rilascio e rating - ho aggiunto anche l'anno per refuso in alcune releaseDate
+            
+            return $movies
+            ->addOrderBy('m.releaseDate', 'DESC')
+            ->orderBy('m.year', 'DESC')
+            ->addOrderBy('m.rating', 'DESC')->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return Movie[] Returns an array of Movie objects
     //     */
